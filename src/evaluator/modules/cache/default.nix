@@ -5,27 +5,34 @@
 }: {
   options = {
     cache = {
-      readAndWrite = {
-        enable = lib.mkOption {
-          default = false;
-          type = lib.types.bool;
-        };
-        name = lib.mkOption {
-          type = lib.types.str;
-        };
-        pubKey = lib.mkOption {
-          type = lib.types.str;
-        };
-      };
-      readExtra = lib.mkOption {
-        default = [];
-        type = lib.types.listOf (lib.types.submodule (_: {
+      extra = lib.mkOption {
+        default = {};
+        type = lib.types.attrsOf (lib.types.submodule (_: {
           options = {
+            enable = lib.mkOption {
+              default = false;
+              type = lib.types.bool;
+            };
+            priority = lib.mkOption {
+              type = lib.types.ints.positive;
+            };
             pubKey = lib.mkOption {
+              default = "";
               type = lib.types.str;
+            };
+            token = lib.mkOption {
+              type = lib.types.str;
+              default = "";
+            };
+            type = lib.mkOption {
+              type = lib.types.enum ["cachix" "attic"];
             };
             url = lib.mkOption {
               type = lib.types.str;
+            };
+            write = lib.mkOption {
+              default = false;
+              type = lib.types.bool;
             };
           };
         }));

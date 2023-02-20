@@ -213,6 +213,16 @@ Real life projects that run entirely on [Makes][makes]:
 
 # Contents
 
+- [🦄 Makes](#-makes)
+  - [Want to get your hands dirty?](#want-to-get-your-hands-dirty)
+  - [At a glance](#at-a-glance)
+    - [Cloud native applications with Kubernetes ☸](#cloud-native-applications-with-kubernetes-)
+    - [Large scale computing on the cloud 🏋](#large-scale-computing-on-the-cloud-)
+    - [Declarative infra, declarative CI/CD, pure profit](#declarative-infra-declarative-cicd-pure-profit)
+    - [From dev to prod 🌟](#from-dev-to-prod-)
+  - [Production ready](#production-ready)
+    - [Demos](#demos)
+- [Contents](#contents)
 - [Why](#why)
 - [Goal](#goal)
 - [Getting started](#getting-started)
@@ -2107,24 +2117,21 @@ and optionally a [Cachix][cachix] cache for reading and writting.
 Types:
 
 - cache:
+  - extra: (attrsOf (cacheExtra))
   - readNixos (`bool`): Optional.
     Set to `true` in order to add https://cache.nixos.org as a read cache.
     Defaults to `true`.
-  - readExtra (`listOf readCacheType`): Optional.
-    Extra caches to read, if any.
-    Defaults to `[ ]`.
-  - readAndWrite:
-    - enable (`boolean`): Optional.
-      Defaults to `false`.
-    - name (`str`):
-      Name of the [Cachix][cachix] cache.
-    - pubKey (`str`):
-      Public key of the [Cachix][cachix] cache.
-- readCacheType (`submodule`):
+- cacheExtra:
+  - enable (`str`): The current cache is enabled and the cache
+    is read on the server.
+  - priority (`int`): the priority that the cache has when being read.
+  - pubKey (`str`): public key to read the cache.
+  - token (`str`): the name of the environment variable that contains the
+    token tu push the cache.
+  - type: (`enum [cachix | attic]`): the cache server type.
   - url (`str`):
     URL of the cache.
-  - pubKey (`str`):
-    Public key of the cache.
+  - write (`bool`): the cache is enabled to push the binary cache.
 
 Required environment variables:
 
@@ -2140,20 +2147,25 @@ Example `makes.nix`:
 {
   cache = {
     readNixos = true;
-    readExtra = [
-      {
-        url = "https://example.com";
-        pubKey = "example.example.org-1:123...";
-      }
-      {
-        url = "https://example2.com";
-        pubKey = "example2.example2.org-1:123...";
-      }
-    ];
-    readAndWrite = {
-      enable = true;
-      name = "makes";
-      pubKey = "makes.cachix.org-1:HbCQcdlYyT/mYuOx6rlgkNkonTGUjVr3D+YpuGRmO+Y=";
+    extra = {
+      main = {
+        enable = true;
+        priority = 20;
+        pubKey = "makes.cachix.org-1:zO7UjWLTRR8Vfzkgsu1PESjmb6ymy1e4OE9YfMmCQR4=";
+        token = "CACHIX_AUTH_TOKEN";
+        type = "nixos";
+        url = "https://makes.cachix.org";
+        write = true;
+      };
+      local = {
+        enable = true;
+        priority = 10;
+        pubKey = "local:nKOS5sOc0MKPoBJZmY4qWjbcXvoJFaO2S/zN6aUztII=";
+        token = "ATTIC_AUTH_TOKEN";
+        type = "attic";
+        url = "http://192.168.1.8:8085/local";
+        write = true;
+      };
     };
   };
 }
